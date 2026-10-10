@@ -208,3 +208,8 @@ python3 ~/.claude/router/route_stats.py 7    # last 7 days
 It shows counts per action (`filled`, `inherited`, `explicit`, `skipped`, `error`), the small / mid /
 top distribution, which models were set, and grouped errors. A large `error` count usually means
 Ollama is not running.
+
+## License
+
+[Zero-Clause BSD (0BSD)](LICENSE). Use, copy, modify and distribute for any purpose, with or without
+fee. No attribution required.
