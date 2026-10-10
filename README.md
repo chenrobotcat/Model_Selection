@@ -92,8 +92,9 @@ curl -s http://localhost:11434/v1/systemone -d '{
 The script:
 
 1. Copies `route_model.py` to `~/.claude/hooks/` and `route_stats.py` to `~/.claude/router/`
-2. Backs up `~/.claude/settings.json` to `settings.json.bak-router`, then merges in the `PreToolUse`
-   hook from `settings.hooks.json` (an earlier router entry is replaced, not duplicated)
+2. On first install only, backs up `~/.claude/settings.json` to `settings.json.bak-router` (an
+   existing backup is never overwritten, so it stays a pre-router copy). Then it merges in the
+   `PreToolUse` hook from `settings.hooks.json` (an earlier router entry is replaced, not duplicated)
 3. Appends a delegation instruction to `~/.claude/CLAUDE.md`, so the orchestrator delegates
    sub-tasks without naming a model
 
@@ -172,7 +173,8 @@ git pull && ./install.sh
 ### Uninstalling
 
 Remove the router entry from `hooks.PreToolUse` in `~/.claude/settings.json` (or restore
-`settings.json.bak-router`), delete the "Sub-agent delegation (model router)" section from
+`settings.json.bak-router`, which holds your settings from before the first install, so any later
+unrelated changes would be lost), delete the "Sub-agent delegation (model router)" section from
 `~/.claude/CLAUDE.md`, then:
 
 ```bash

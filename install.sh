@@ -13,7 +13,12 @@ chmod +x "$CLAUDE_DIR/hooks/route_model.py" "$CLAUDE_DIR/router/route_stats.py"
 echo "Copied hook and stats script into $CLAUDE_DIR"
 
 # Merge the PreToolUse hook into settings.json, replacing any earlier router entry.
-[ -f "$SETTINGS" ] && cp "$SETTINGS" "$SETTINGS.bak-router"
+# Back up only on first install, so the backup stays a pre-router copy for uninstalling.
+BACKUP="$SETTINGS.bak-router"
+if [ -f "$SETTINGS" ] && [ ! -e "$BACKUP" ]; then
+  cp "$SETTINGS" "$BACKUP"
+  echo "Backed up $SETTINGS to $BACKUP"
+fi
 python3 - "$SETTINGS" "$SRC/settings.hooks.json" <<'EOF'
 import json, os, sys
 path, new_path = sys.argv[1], sys.argv[2]
@@ -27,7 +32,7 @@ with open(path, "w") as f:
     json.dump(settings, f, indent=2, ensure_ascii=False)
     f.write("\n")
 EOF
-echo "Merged hook into $SETTINGS (backup: settings.json.bak-router)"
+echo "Merged hook into $SETTINGS"
 
 # Tell the orchestrator to delegate without naming a model.
 MARKER="# Sub-agent delegation (model router)"

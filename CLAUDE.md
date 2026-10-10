@@ -56,4 +56,6 @@ cat /path/to/scratch/.claude/router/routes.jsonl
   both files when you add an action or field.
 - **`install.sh` is idempotent.** It replaces any existing hook entry whose command contains
   `route_model.py` and appends to `CLAUDE.md` only if the `# Sub-agent delegation (model router)`
-  marker is missing. Keep both checks if you change the hook command or that text.
+  marker is missing. It backs up `settings.json` to `settings.json.bak-router` only if no backup
+  exists, so the backup stays a pre-router copy for uninstalling. Keep these checks if you change the
+  hook command or that text.
