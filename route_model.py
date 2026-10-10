@@ -20,10 +20,12 @@ Env
                  else the contents of ~/.claude/router/api_key
   ROUTER_MIN_CONF confidence threshold (default 0.5)
   ROUTER_TIMEOUT  seconds (default 8)
+                  (a non-numeric or non-finite value falls back to the default)
   ROUTER_TYPES    comma-separated subagent_types to route (default general-purpose;
                   a missing subagent_type counts as general-purpose)
 """
 import json
+import math
 import os
 import re
 import sys
@@ -44,8 +46,19 @@ DEFAULT_URL = {
 }
 URL = os.environ.get("ROUTER_URL") or DEFAULT_URL.get(STYLE, DEFAULT_URL["anthropic"])
 MODEL = os.environ.get("ROUTER_MODEL") or ("nimble" if STYLE == "jev" else "claude-haiku-5-5")
-MIN_CONF = float(os.environ.get("ROUTER_MIN_CONF", "0.5"))
-TIMEOUT = float(os.environ.get("ROUTER_TIMEOUT", "8"))
+
+
+def env_float(name, default):
+    # Parsed at import time, outside rule 4's try, so a bad value must not raise.
+    try:
+        value = float(os.environ.get(name, default))
+    except ValueError:
+        return default
+    return value if math.isfinite(value) else default
+
+
+MIN_CONF = env_float("ROUTER_MIN_CONF", 0.5)
+TIMEOUT = env_float("ROUTER_TIMEOUT", 8.0)
 MAX_BRIEF_CHARS = 4000
 ROUTED_TYPES = {t.strip() for t in
                 os.environ.get("ROUTER_TYPES", "general-purpose").split(",") if t.strip()}
@@ -90,6 +103,15 @@ def post(body, headers):
         return json.load(resp)
 
 
+def confidence(value):
+    # json accepts NaN/Infinity, and NaN < MIN_CONF is False, so reject anything odd.
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"bad confidence {value!r}")
+    if not (math.isfinite(value) and 0 <= value <= 1):
+        raise ValueError(f"bad confidence {value!r}")
+    return float(value)
+
+
 def classify_jev(brief):
     data = post({
         "model": MODEL,
@@ -101,7 +123,7 @@ def classify_jev(brief):
         }},
     }, {})
     ans = data["answers"]["tier"]
-    return str(ans["choice"]).lower(), float(ans.get("confidence", 0))
+    return str(ans["choice"]).lower(), confidence(ans.get("confidence", 0))
 
 
 def classify(brief):
@@ -131,7 +153,7 @@ def classify(brief):
     tier = str(out["tier"]).lower()
     if tier not in ("small", "mid", "top"):
         raise ValueError(f"bad tier {tier!r}")
-    return tier, float(out.get("confidence", 0))
+    return tier, confidence(out.get("confidence", 0))
 
 
 def log(event):
