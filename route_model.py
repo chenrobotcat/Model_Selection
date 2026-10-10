@@ -65,11 +65,18 @@ ROUTED_TYPES = {t.strip() for t in
 
 TIER_CRITERIA = {
     "small": "Mechanical, well-specified, low-risk: file lookups, grep/search, summarizing given "
-             "text, renaming, formatting, running a known command and reporting output.",
+             "text, renaming, formatting, running a known command and reporting output. "
+             "Documents: fixing typos or formatting, changing a given value, translating or "
+             "reformatting an existing section without changing its meaning.",
     "mid": "Ordinary engineering: implementing a clearly scoped feature or fix, writing tests, "
-           "reviewing a bounded diff, routine multi-file changes, research with a clear question.",
+           "reviewing a bounded diff, routine multi-file changes, research with a clear question. "
+           "Documents: drafting a document, guide or worked examples from a clear spec or source "
+           "material; updating manuals or test scripts to match described changes; turning notes "
+           "into a structured document.",
     "top": "Hard or open-ended: architecture/design decisions, subtle debugging, security analysis, "
-           "ambiguous requirements, long multi-step autonomy, anything where a mistake is costly.",
+           "ambiguous requirements, long multi-step autonomy, anything where a mistake is costly. "
+           "Documents: strategy, policy or design documents that need judgment and trade-offs, "
+           "compliance or legal assessments, or writing from unclear or undecided requirements.",
 }
 
 SYSTEM = """You route sub-agent tasks to a model tier. Reply with ONLY a JSON object:
@@ -77,10 +84,17 @@ SYSTEM = """You route sub-agent tasks to a model tier. Reply with ONLY a JSON ob
 
 small: mechanical, well-specified, low-risk — file lookups, grep/search, summarizing given text,
        renaming, formatting, running a known command and reporting output.
+       Documents: fixing typos or formatting, changing a given value, translating or reformatting
+       an existing section without changing its meaning.
 mid:   ordinary engineering — implementing a clearly scoped feature or fix, writing tests,
        code review of a bounded diff, multi-file but routine changes, research with a clear question.
+       Documents: drafting a document, guide or worked examples from a clear spec or source material;
+       updating manuals or test scripts to match described changes; turning notes into a structured
+       document.
 top:   hard or open-ended — architecture/design decisions, subtle debugging, security analysis,
        ambiguous requirements, long multi-step autonomy, anything where a mistake is costly.
+       Documents: strategy, policy or design documents that need judgment and trade-offs,
+       compliance or legal assessments, or writing from unclear or undecided requirements.
 confidence: how sure you are of the tier. Use < 0.5 when the brief is too vague to judge."""
 
 
